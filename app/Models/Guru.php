@@ -18,4 +18,9 @@ class Guru extends Model
     {
         return $this->hasMany(PerkembanganBacaan::class);
     }
+
+    public function hafalanSiswa()
+    {
+        return $this->hasMany(HafalanSiswa::class);
+    }
 }

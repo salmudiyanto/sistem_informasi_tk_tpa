@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\MunaqasahController;
 use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\SetorController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\WaliController;
 use App\Models\Siswa;
@@ -31,9 +32,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
 // Grup route untuk guru
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('guru.dashboard');
-    })->name('guru.dashboard');
+    Route::get('/dashboard', [SetorController::class, 'index'])->name('guru.dashboard');
+
+    Route::get('hafalan', [SetorController::class, 'hafalan'])->name('setor.hafalan');
+    Route::get('hafalan-siswa/{id}', [SetorController::class, 'hafalanSiswa'])->name('setor.hafalanSiswa');
+    Route::post('tambah-setor/{siswa}/{doa}', [SetorController::class, 'tambahSetor'])->name('guru.tambahSetor');
+    Route::get('bacaan', [SetorController::class, 'bacaan'])->name('setor.bacaan');
+    Route::get('bacaan-siswa/{id}', [SetorController::class, 'bacaanSiswa'])->name('setor.bacaanSiswa');
+    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+
 });
 
 // Grup route untuk wali

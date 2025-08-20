@@ -7,7 +7,7 @@ class HafalanSiswa extends Model
 {
     protected $table = 'hafalan_siswa';
 
-    protected $fillable = ['siswa_id', 'hafalan_doa_id', 'tanggal_setor', 'status', 'catatan'];
+    protected $fillable = ['siswa_id', 'hafalan_doa_id', 'tanggal_setor', 'status', 'catatan', 'guru_id'];
 
     public function siswa()
     {
@@ -17,5 +17,10 @@ class HafalanSiswa extends Model
     public function doa()
     {
         return $this->belongsTo(HafalanDoa::class, 'hafalan_doa_id');
+    }
+
+    public function guru()
+    {
+        return $this->belongsTo(Guru::class);
     }
 }

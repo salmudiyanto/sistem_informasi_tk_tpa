@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AuthController::class, 'showLoginForm'])->name('showlogin');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Grup route untuk admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
@@ -26,7 +26,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::resource('munaqasah', MunaqasahController::class);
     Route::resource('pembayaran', PembayaranController::class);
 
-    Route::get('logout', [AdminController::class, 'logout'])->name('logout');
+    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 });
 
 // Grup route untuk guru

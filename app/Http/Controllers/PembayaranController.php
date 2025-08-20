@@ -57,7 +57,7 @@ class PembayaranController extends Controller
 
         $dataSiswa = Siswa::where('tingkat_id', $request->tingkat)->get();
         if($dataSiswa->isEmpty()){
-            return redirect()->route('pembayaran.index')->with('error', 'Tidak ada siswa di tingkat ini');
+            return redirect()->route('pembayaran.index')->withErrors('Tidak ada siswa di tingkat ini');
         }
 
         foreach ($dataSiswa as $siswa){

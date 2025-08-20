@@ -34,7 +34,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h4>Detail Siswa: {{ $siswa->nama }}</h4>
-                            <a href="{{ route('guru.dashboard') }}" class="btn btn-secondary btn-sm">Kembali</a>
+                            <a href="{{ route('setor.hafalan') }}" class="btn btn-secondary btn-sm">Kembali</a>
                         </div>
                         <div class="card-body">
                             <p><strong>Nama:</strong> {{ $siswa->nama }}</p>
@@ -62,7 +62,7 @@
                                             <td>{{ $doa->nama_doa }}</td>
                                             <td>{{ $doa->kategori }}</td>
                                             <td>{{ $doa->tanggal_setor ?? '-' }}</td>
-                                            <td>{{ $doa->guru->nama ?? '-' }}</td>
+                                            <td>{{ $doa->guru_nama ?? '-' }}</td>
                                             <td>{{ $doa->status ?? 'Belum Setor' }}</td>
                                             <td>
                                                 @if ($doa->status != 'hafal')

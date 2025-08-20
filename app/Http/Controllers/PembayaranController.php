@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\IuranBulanan;
 use App\Models\Siswa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class PembayaranController extends Controller
 {
@@ -47,6 +48,20 @@ class PembayaranController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
+    private function formatNomor($nomor)
+    {
+        $nomor = preg_replace('/[^0-9\+]/', '', $nomor);
+    
+        if (substr($nomor, 0, 1) === '0') {
+            return '62' . substr($nomor, 1);
+        } elseif (substr($nomor, 0, 1) === '+') {
+            return substr($nomor, 1);
+        }
+    
+        return $nomor;
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -75,10 +90,61 @@ class PembayaranController extends Controller
                         'status'        => 'belum',
                         'tanggal_bayar' => null,
                     ]);
+
+                    if (!empty($siswa->wali) && !empty($siswa->wali->telepon)) {
+                        $nomorWA = $this->formatNomor($siswa->wali->telepon);
+            
+                        $pesan = "*Invoice Iuran Bulanan*\n\n".
+                                 "Nama Siswa : {$siswa->nama}\n".
+                                 "Orang Tua  : {$siswa->wali->nama}\n".
+                                 "Bulan      : {$request->bulan}\n".
+                                 "Tahun      : {$request->tahun}\n".
+                                 "Jumlah     : Rp " . number_format($request->jumlah, 0, ',', '.') . "\n".
+                                 "Status     : BELUM DIBAYAR\n\n".
+                                 "Mohon segera melakukan pembayaran. Terima kasih 🙏";
+            
+                        // Http::withHeaders([
+                        //     'Authorization' => 'Bearer ' . env('GNqBYCDhswRh96KfuPwc'),
+                        // ])->post('https://api.fontte.com/messages', [
+                        //     'phone'   => $nomorWA,
+                        //     'message' => $pesan,
+                        // ]);
+                        $curl = curl_init();
+                        curl_setopt_array($curl, array(
+                          CURLOPT_URL => 'https://api.fonnte.com/send',
+                          CURLOPT_RETURNTRANSFER => true,
+                          CURLOPT_ENCODING => '',
+                          CURLOPT_MAXREDIRS => 10,
+                          CURLOPT_TIMEOUT => 0,
+                          CURLOPT_FOLLOWLOCATION => true,
+                          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                          CURLOPT_CUSTOMREQUEST => 'POST',
+                          CURLOPT_POSTFIELDS => array(
+                        'target' => $nomorWA,
+                        'message' => $pesan, 
+                        'countryCode' => '62', //optional
+                        ),
+                          CURLOPT_HTTPHEADER => array(
+                            "Authorization: GNqBYCDhswRh96KfuPwc" //change TOKEN to your actual token
+                          ),
+                        ));
+                        
+                        $response = curl_exec($curl);
+                        if (curl_errno($curl)) {
+                          $error_msg = curl_error($curl);
+                        }
+                        curl_close($curl);
+                        if(isset($error_msg)){
+                            echo $error_msg;
+                          }else{
+                            echo 'sukses';
+                          }
+                    }
+
             }
         }
         
-        return redirect()->route('pembayaran.index')->with('success', 'Data iuran berhasil di generate');
+        // return redirect()->route('pembayaran.index')->with('success', 'Data iuran berhasil di generate');
     }
 
     /**

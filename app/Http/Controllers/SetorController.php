@@ -25,7 +25,7 @@ class SetorController extends Controller
             $jmlSiswa = Siswa::where('tingkat_id', '2')->count();
         }else if($dataGuru->bidang == 'TKA'){
             $jmlSiswa = Siswa::where('tingkat_id', '1')->count();
-        }else if($dataGuru->bidang == 'TKA'){
+        }else if($dataGuru->bidang == 'Keduanya'){
             $jmlSiswa = Siswa::whereIn('tingkat_id', ['1', '2'])->count();
         }
         
@@ -46,7 +46,7 @@ class SetorController extends Controller
             $dataSiswa = Siswa::where('tingkat_id', '2')->get();
         }else if($dataGuru->bidang == 'TKA'){
             $dataSiswa = Siswa::where('tingkat_id', '1')->get();
-        }else if($dataGuru->bidang == 'TKA'){
+        }else if($dataGuru->bidang == 'Keduanya'){
             $dataSiswa = Siswa::whereIn('tingkat_id', ['1', '2'])->get();
         }
         return view('guru.hafalan', ['dataSiswa' => $dataSiswa]);
@@ -97,7 +97,7 @@ class SetorController extends Controller
             $dataSiswa = Siswa::where('tingkat_id', '2')->get();
         }else if($dataGuru->bidang == 'TKA'){
             $dataSiswa = Siswa::where('tingkat_id', '1')->get();
-        }else if($dataGuru->bidang == 'TKA'){
+        }else if($dataGuru->bidang == 'Keduanya'){
             $dataSiswa = Siswa::whereIn('tingkat_id', ['1', '2'])->get();
         }
         return view('guru.bacaan', ['dataSiswa' => $dataSiswa]);
@@ -109,6 +109,22 @@ class SetorController extends Controller
         $bacaan = PerkembanganBacaan::with('siswa')->where('perkembangan_bacaan.siswa_id', '=', $id)->get();
         $idSiswa = $id;
         return view('guru.bacaan_detail', compact('siswa', 'bacaan', 'idSiswa'));
+    }
+
+    public function simpanBacaan(Request $request, $id){
+        $dataUser = Auth::user();
+        PerkembanganBacaan::create([
+            'siswa_id' => $id,
+            'tanggal' => date('Y-m-d'),
+            'surat' => $request->surah,
+            'ayat_mulai' => $request->awal,
+            'ayat_selesai' => $request->akhir,
+            'status' => $request->status,
+            'catatan' => $request->catatan,
+            'guru_id' => $dataUser->related_id
+        ]);
+        return redirect()->route('setor.bacaan')->with('success', 'Sukses.');
+
     }
 
     /**

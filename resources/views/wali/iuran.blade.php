@@ -10,7 +10,7 @@
                         <div class="col-lg-8">
                             <div class="page-header-title">
                                 <div class="d-inline">
-                                    <h4>Selamat datang, {{ $dataWali->nama }}</h4>
+                                    <h4>Iuran Bulanan</h4>
                                     <span> </span>
                                 </div>
                             </div>
@@ -58,22 +58,26 @@
                                             <th>Nama</th>
                                             <th>Jenis Kelamin</th>
                                             <th>Tingkat</th>
-                                            <th>Aksi</th>
+                                            <th>Bulan</th>
+                                            <th>Tahun</th>
+                                            <th>Jumlah Bayar</th>
+                                            <th>Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @php
                                             $no=1;
                                         @endphp
-                                        @foreach ($dataSiswa as $row)
+                                        @foreach ($iuranBulanan as $row)
                                             <tr>
                                                 <td>{{ $no++ }}</td>
-                                                <td>{{ $row->nama }}</td>
-                                                <td>{{ $row->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
-                                                <td>{{ $row->tingkat_id == '1' ? 'TKA' : 'TPA' }}</td>
-                                                <td>
-                                                    <a href="{{ route('wali.bacaan', $row->id) }}" class="btn btn-info btn-sm">Detail</a>
-                                                </td>
+                                                <td>{{ $row->siswa->nama }}</td>
+                                                <td>{{ $row->siswa->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
+                                                <td>{{ $row->siswa->tingkat_id == '1' ? 'TKA' : 'TPA' }}</td>
+                                                <td>{{ $row->bulan }}</td>
+                                                <td>{{ $row->tahun }}</td>
+                                                <td>{{ $row->jumlah }}</td>
+                                                <td>{{ $row->status }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -83,7 +87,10 @@
                                             <th>Nama</th>
                                             <th>Jenis Kelamin</th>
                                             <th>Tingkat</th>
-                                            <th>Aksi</th>
+                                            <th>Bulan</th>
+                                            <th>Tahun</th>
+                                            <th>Jumlah Bayar</th>
+                                            <th>Status</th>
                                         </tr>
                                     </tfoot>
                                 </table>

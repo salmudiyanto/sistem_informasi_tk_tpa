@@ -1,4 +1,4 @@
-@extends('guru.app')
+@extends('wali.app')
 
 @section('content')
 <div class="pcoded-content">
@@ -21,7 +21,7 @@
                                     <li class="breadcrumb-item">
                                         <a href="/"> <i class="feather icon-home"></i> </a>
                                     </li>
-                                    <li class="breadcrumb-item"><a href="#">Guru</a>
+                                    <li class="breadcrumb-item"><a href="#">Wali</a>
                                     </li>
                                     <li class="breadcrumb-item"><a href="#">Setor Hafalan</a>
                                     </li>
@@ -40,34 +40,7 @@
                             <p><strong>Nama:</strong> {{ $siswa->nama }}</p>
                             <p><strong>Alamat:</strong> {{ $siswa->alamat }}</p>
                             <p><strong>Jenis Kelamin:</strong> {{ $siswa->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</p>
-                            <p><strong>Wali:</strong> {{ $siswa->wali->nama }}</p>
                             <p><strong>Tingkat:</strong> {{ $siswa->tingkat->nama_tingkat }}</p>
-
-                            <form action="{{ route('simpan.bacaan', [$siswa->id]) }}" method="post">
-                                @csrf
-                            @if ($siswa->tingkat->id == '1')
-                                    <p><strong>Iqra</strong> <input type="text" class="form-control" name="surah"></p>
-                                    <p><strong>Halaman Awal</strong> <input type="text" class="form-control" name="awal"></p>
-                                    <p><strong>Halaman Akhir</strong> <input type="text" class="form-control" name="akhir"></p>
-                                    <p><strong>Status</strong> <select name="status" id="" class="form-control">
-                                        <option value="lancar">Lancar</option>
-                                        <option value="perlu bimbingan">Perlu Bimbingan</option>
-                                        <option value="belum bisa">Belum Bisa</option>
-                                    </select>
-                                    <p><strong>Catatan</strong> <input type="text" class="form-control" name="catatan"></p>
-                            @else
-                                    <p><strong>Surat</strong> <input type="text" class="form-control" name="surah"></p>
-                                    <p><strong>Ayat Awal</strong> <input type="text" class="form-control" name="awal"></p>
-                                    <p><strong>Ayat Akhir</strong> <input type="text" class="form-control" name="akhir"></p>
-                                    <p><strong>Status</strong> <select name="status" id="" class="form-control">
-                                        <option value="lancar">Lancar</option>
-                                        <option value="perlu bimbingan">Perlu Bimbingan</option>
-                                        <option value="belum bisa">Belum Bisa</option>
-                                    </select>
-                                    <p><strong>Catatan</strong> <input type="text" class="form-control" name="catatan"></p>
-                            @endif
-                            <p><button type="submit" class="btn btn-success">Simpan Perkembangan</button></p>
-                            </form>
                     
                             <h5 class="mt-4">Daftar Bacaan</h5>
                             @if ($siswa->tingkat->id == '1')
@@ -131,6 +104,32 @@
                                 </tbody>
                             </table>
                             @endif
+                            <h5 class="mt-4">Daftar Hafalan</h5>
+
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Nama Hafalan</th>
+                                        <th>Kategori</th>
+                                        <th>Tanggal Setor</th>
+                                        <th>Guru</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($hafalan as $index => $doa)
+                                        <tr>
+                                            <td>{{ $index +1 }}</td>
+                                            <td>{{ $doa->nama_doa }}</td>
+                                            <td>{{ $doa->kategori }}</td>
+                                            <td>{{ $doa->tanggal_setor ?? '-' }}</td>
+                                            <td>{{ $doa->guru_nama ?? '-' }}</td>
+                                            <td>{{ $doa->status ?? 'Belum Setor' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

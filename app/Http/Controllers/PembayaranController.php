@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\IuranBulanan;
 use App\Models\Siswa;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Midtrans\Config;
+use Midtrans\Notification;
 
 class PembayaranController extends Controller
 {
@@ -91,6 +94,30 @@ class PembayaranController extends Controller
                         'tanggal_bayar' => null,
                     ]);
 
+                    $midtrans = new MidtransService();
+                    $params = [
+                        'transaction_details' => [
+                            'order_id'      => 'INV-' . time() . '-' . $siswa->id,
+                            'gross_amount'  => $request->jumlah,
+                        ],
+                        'customer_details' => [
+                            'first_name' => $siswa->wali->nama,
+                            'phone'      => $this->formatNomor($siswa->wali->telepon),
+                            'email'      => $siswa->wali->email ?? 'email@dummy.com',
+                        ],
+                        'item_details' => [
+                            [
+                                'id'       => $siswa->id,
+                                'price'    => $request->jumlah,
+                                'quantity' => 1,
+                                'name'     => 'Iuran Bulanan - ' . $request->bulan . ' ' . $request->tahun,
+                            ]
+                        ],
+                    ];
+                    
+                    $snap = $midtrans->createTransaction($params);
+                    $paymentUrl = $snap->redirect_url;
+
                     if (!empty($siswa->wali) && !empty($siswa->wali->telepon)) {
                         $nomorWA = $this->formatNomor($siswa->wali->telepon);
             
@@ -101,6 +128,7 @@ class PembayaranController extends Controller
                                  "Tahun      : {$request->tahun}\n".
                                  "Jumlah     : Rp " . number_format($request->jumlah, 0, ',', '.') . "\n".
                                  "Status     : BELUM DIBAYAR\n\n".
+                                 "Silakan lakukan pembayaran melalui link berikut:\n{$paymentUrl}\n\n".
                                  "Mohon segera melakukan pembayaran. Terima kasih 🙏";
             
                         // Http::withHeaders([
@@ -144,7 +172,59 @@ class PembayaranController extends Controller
             }
         }
         
-        // return redirect()->route('pembayaran.index')->with('success', 'Data iuran berhasil di generate');
+        return redirect()->route('pembayaran.index')->with('success', 'Data iuran berhasil di generate');
+    }
+
+
+    public function callback(Request $request)
+    {
+        // Setup konfigurasi Midtrans
+        Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+        Config::$isProduction = env('MIDTRANS_IS_PRODUCTION', false);
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
+
+        $notification = new Notification();
+
+        $transaction   = $notification->transaction_status;
+        $type          = $notification->payment_type;
+        $orderId       = $notification->order_id;
+        $fraud         = $notification->fraud_status;
+
+        // order_id kamu: "INV-{timestamp}-{siswa_id}"
+        $parts = explode('-', $orderId);
+        $siswaId = end($parts); // ambil siswa_id dari order_id
+
+        // Cari iuran berdasarkan siswa & bulan & tahun
+        $iuran = IuranBulanan::where('siswa_id', $siswaId)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$iuran) {
+            return response()->json(['message' => 'Iuran not found'], 404);
+        }
+
+        if ($transaction == 'capture') {
+            if ($type == 'credit_card') {
+                if ($fraud == 'challenge') {
+                    $iuran->status = 'pending';
+                } else {
+                    $iuran->status = 'lunas';
+                    $iuran->tanggal_bayar = now();
+                }
+            }
+        } else if ($transaction == 'settlement') {
+            $iuran->status = 'lunas';
+            $iuran->tanggal_bayar = now();
+        } else if ($transaction == 'pending') {
+            $iuran->status = 'pending';
+        } else if ($transaction == 'deny' || $transaction == 'expire' || $transaction == 'cancel') {
+            $iuran->status = 'gagal';
+        }
+
+        $iuran->save();
+
+        return response()->json(['message' => 'Callback processed']);
     }
 
     /**

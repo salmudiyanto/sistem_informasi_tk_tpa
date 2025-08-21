@@ -41,7 +41,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->group(function () {
     Route::get('bacaan-siswa/{id}', [SetorController::class, 'bacaanSiswa'])->name('setor.bacaanSiswa');
     Route::post('tambah-bacaan/{siswa}', [SetorController::class, 'simpanBacaan'])->name('simpan.bacaan');
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
-
+    
 });
 
 // Grup route untuk wali
@@ -49,4 +49,6 @@ Route::middleware(['auth', 'role:wali'])->prefix('wali')->group(function () {
     Route::get('/dashboard', [WaliController::class, 'dashboard'])->name('wali.dashboard');
     Route::get('/bacaan/{siswa}', [WaliController::class, 'bacaan'])->name('wali.bacaan');
     Route::get('/pembayaran', [WaliController::class, 'pembayaran'])->name('wali.pembayaran');
+    Route::post('/midtrans/callback', [PembayaranController::class, 'callback']);
+    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 });
